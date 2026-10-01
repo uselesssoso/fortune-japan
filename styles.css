@@ -71,12 +71,24 @@ body::before {
 }
 
 .wordmark {
-  margin: 0.35rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  margin: 0 0 1.35rem;
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+}
+
+.plug {
+  display: block;
+  width: 1.7rem;
+  height: auto;
+  flex: none;
+  color: var(--ink);
 }
 
 h1 {
