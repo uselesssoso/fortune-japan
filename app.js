@@ -208,11 +208,14 @@
     var plain = formatPlain(fortune);
     writeClipboard(plain).then(function (ok) {
       copyButton.textContent = ok ? "Copied" : "Copy failed";
-      copyStatus.textContent = ok ? "Fortune copied." : "Could not copy. Select the slip and copy it yourself.";
+      copyStatus.textContent = ok
+        ? "Copied to the clipboard."
+        : "Could not copy. Select the slip and copy it yourself.";
       window.clearTimeout(copyTimer);
       copyTimer = window.setTimeout(function () {
         copyButton.textContent = "Copy fortune";
-      }, 1800);
+        copyStatus.textContent = "";
+      }, 2400);
     });
   }
 
@@ -227,17 +230,29 @@
   }
 
   function writeClipboard(value) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(value).then(
-        function () {
-          return true;
-        },
-        function () {
-          return fallbackCopy(value);
-        }
-      );
-    }
-    return Promise.resolve(fallbackCopy(value));
+    return new Promise(function (resolve) {
+      var settled = false;
+      function finish(ok) {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(
+          function () {
+            finish(true);
+          },
+          function () {
+            finish(fallbackCopy(value));
+          }
+        );
+        window.setTimeout(function () {
+          if (!settled) finish(fallbackCopy(value));
+        }, 500);
+        return;
+      }
+      finish(fallbackCopy(value));
+    });
   }
 
   function fallbackCopy(value) {

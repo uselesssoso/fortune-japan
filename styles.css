@@ -419,21 +419,22 @@ h1 {
   color: var(--ink);
   font: inherit;
   font-size: 0.95rem;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .ghost:hover { border-color: var(--ink); }
 
-.status {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.copy-status {
+  margin: 0.65rem 0 0;
+  color: var(--vermilion-deep);
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+.copy-status:empty {
+  display: none;
+  margin: 0;
 }
 
 .site-footer {
