@@ -7,7 +7,7 @@
   var lang = loadLang();
   var UI = {
     en: {
-      tagline: "Tells your fortune. Accuracy not included.",
+      tagline: ["Tells your fortune.", "Accuracy not included."],
       name: "Name",
       optional: "optional",
       namePlaceholder: "For a fortune that stays put today",
@@ -37,7 +37,7 @@
       title: "fortune-japan — Tells your fortune",
     },
     ja: {
-      tagline: "運勢を告げる。精度は保証しない。",
+      tagline: ["運勢を告げる。", "精度は保証しない。"],
       name: "名前",
       optional: "任意",
       namePlaceholder: "今日の籤を固定するなら",
@@ -67,7 +67,7 @@
       title: "fortune-japan — 運勢を告げる",
     },
     zh: {
-      tagline: "告诉你运势。准不准另说。",
+      tagline: ["告诉你运势。", "准不准另说。"],
       name: "名字",
       optional: "可选",
       namePlaceholder: "用来把今天的签固定住",
@@ -305,7 +305,7 @@
       fortune.named
         ? t("heldNamed").replace("{name}", fortune.displayName)
         : t("heldRandom"),
-      t("tagline")
+      taglineText()
     );
     return lines.join("\n");
   }
@@ -523,8 +523,25 @@
     shareButton.textContent = t("share");
     if (drawing) drawButton.textContent = t("shaking");
     else drawButton.textContent = current ? t("drawAgain") : t("draw");
+    renderTagline();
     if (current) renderSlip(current);
     else copyButton.textContent = t("copy");
+  }
+
+  function taglineText() {
+    return t("tagline").join(lang === "en" ? " " : "");
+  }
+
+  function renderTagline() {
+    var el = document.querySelector(".tagline");
+    el.replaceChildren();
+    t("tagline").forEach(function (sentence, index) {
+      if (index > 0 && lang === "en") el.append(document.createTextNode(" "));
+      var line = document.createElement("span");
+      line.className = "tagline-line";
+      line.textContent = sentence;
+      el.append(line);
+    });
   }
 
   function summaryText(fortune) {

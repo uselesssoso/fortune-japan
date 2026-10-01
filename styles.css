@@ -90,13 +90,18 @@ h1 {
 
 .tagline {
   margin: 0.85rem auto 0;
-  max-width: 18rem;
+  max-width: 100%;
   color: var(--ink);
   font-family: var(--serif);
   font-size: 1.2rem;
   font-weight: 460;
   font-style: italic;
   line-height: 1.35;
+}
+
+.tagline-line {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .lang-switch {
