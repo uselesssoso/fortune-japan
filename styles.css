@@ -10,7 +10,7 @@
   --gold: #a68456;
   --shadow: 0 18px 50px rgba(72, 42, 24, 0.1);
   --serif: "Fraunces", "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
-  --sans: "Figtree", "Avenir Next", "Segoe UI", sans-serif;
+  --sans: "Figtree", "Noto Sans JP", "Hiragino Sans", "Avenir Next", "Segoe UI", sans-serif;
   --mincho: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Iowan Old Style", serif;
   color-scheme: light;
 }
@@ -90,13 +90,56 @@ h1 {
 
 .tagline {
   margin: 0.85rem auto 0;
-  max-width: 16rem;
+  max-width: 18rem;
   color: var(--ink);
   font-family: var(--serif);
   font-size: 1.2rem;
   font-weight: 460;
   font-style: italic;
   line-height: 1.35;
+}
+
+.lang-switch {
+  display: inline-flex;
+  margin-top: 1.05rem;
+  padding: 0.15rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 250, 246, 0.45);
+}
+
+.lang {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.38rem 0.72rem;
+  cursor: pointer;
+}
+
+.lang.is-on {
+  background: var(--vermilion);
+  color: #fffaf6;
+}
+
+html[lang="ja"] {
+  --sans: "Noto Sans JP", "Hiragino Sans", "Figtree", sans-serif;
+  --serif: "Shippori Mincho", "Noto Serif JP", "Fraunces", serif;
+}
+
+html[lang="zh-Hans"] {
+  --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Figtree", sans-serif;
+  --serif: "Noto Sans SC", "PingFang SC", "Fraunces", sans-serif;
+}
+
+html[lang="ja"] .slip-meta,
+html[lang="zh-Hans"] .slip-meta {
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .draw-form { margin-top: 1.75rem; }
@@ -118,6 +161,12 @@ h1 {
   font-weight: 500;
   letter-spacing: 0.02em;
   text-transform: none;
+}
+
+.name-label span:first-child {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .name-field input {
@@ -325,26 +374,41 @@ h1 {
 
 .category dt {
   display: flex;
-  gap: 0.45rem;
-  align-items: baseline;
+  gap: 0.55rem;
+  align-items: flex-end;
   margin: 0;
   color: var(--muted);
   font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.category ruby {
+  color: var(--vermilion-deep);
+  font-family: var(--mincho);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.15;
+  ruby-position: over;
+}
+
+.category rt {
+  font-family: var(--sans);
+  font-size: 0.48em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.category .gloss {
+  padding-bottom: 0.1rem;
+  color: var(--muted);
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.category dt span:first-child {
-  color: var(--vermilion-deep);
-  font-family: var(--mincho);
-  font-size: 0.95rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: none;
-}
-
-.slip[data-tone="bad"] .category dt span:first-child { color: #3d4a57; }
+.slip[data-tone="bad"] .category ruby { color: #3d4a57; }
 
 .category dd {
   margin: 0.15rem 0 0;
@@ -411,6 +475,9 @@ h1 {
 }
 
 .ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 2.7rem;
   padding: 0.45rem 0.95rem;
   border: 1px solid var(--line);
@@ -419,6 +486,7 @@ h1 {
   color: var(--ink);
   font: inherit;
   font-size: 0.95rem;
+  line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
 }

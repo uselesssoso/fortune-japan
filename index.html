@@ -4,16 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>fortune-japan — Tells your fortune</title>
-    <meta name="description" content="Tells your fortune. Accuracy not included. Draw an omikuji in the browser.">
+    <meta name="description" content="Tells your fortune. Accuracy not included.">
     <meta name="theme-color" content="#f4efe6">
     <meta property="og:title" content="fortune-japan">
     <meta property="og:description" content="Tells your fortune. Accuracy not included.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="https://uselesssoso.github.io/fortune-japan/docs/screenshot.png">
+    <meta property="og:url" content="https://uselesssoso.github.io/fortune-japan/">
+    <meta property="og:image" content="https://uselesssoso.github.io/fortune-japan/docs/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="fortune-japan. Tells your fortune. Accuracy not included.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="fortune-japan">
+    <meta name="twitter:description" content="Tells your fortune. Accuracy not included.">
+    <meta name="twitter:image" content="https://uselesssoso.github.io/fortune-japan/docs/og.png">
+    <meta name="twitter:image:alt" content="fortune-japan. Tells your fortune. Accuracy not included.">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,460;9..144,560&family=Shippori+Mincho:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Fraunces:opsz,wght@9..144,460;9..144,560&family=Noto+Sans+JP:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Shippori+Mincho:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -28,15 +37,20 @@
         </svg>
         <p class="wordmark">fortune-japan</p>
         <h1 lang="ja">おみくじ</h1>
-        <p class="tagline">Tells your fortune. Accuracy not included.</p>
+        <p class="tagline" data-i18n="tagline">Tells your fortune. Accuracy not included.</p>
+        <div class="lang-switch" id="lang-switch" role="radiogroup" aria-label="Language">
+          <button type="button" class="lang is-on" data-lang="en" aria-checked="true">EN</button>
+          <button type="button" class="lang" data-lang="ja" aria-checked="false">日本語</button>
+          <button type="button" class="lang" data-lang="zh" aria-checked="false">中文</button>
+        </div>
       </header>
 
       <form id="draw-form" class="draw-form">
         <label class="name-field">
-          <span class="name-label">Name <span>optional</span></span>
-          <input id="name" name="name" maxlength="40" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="For a fortune that stays put today">
+          <span class="name-label"><span data-i18n="name">Name</span> <span data-i18n="optional">optional</span></span>
+          <input id="name" name="name" maxlength="40" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="For a fortune that stays put today" data-i18n-placeholder="namePlaceholder">
         </label>
-        <p class="hint">Same name, same day, same answer. Your name stays in the browser.</p>
+        <p class="hint" data-i18n="hint">Same name, same day, same answer. Your name stays in the browser.</p>
 
         <div class="shrine-hit" id="shrine-hit">
           <div class="shrine">
@@ -96,7 +110,7 @@
         <dl class="categories" id="categories"></dl>
         <div class="charms">
           <div>
-            <p class="charm-label">Lucky color</p>
+            <p class="charm-label" data-i18n="luckyColor">Lucky color</p>
             <p class="charm-value">
               <i id="color-swatch" class="swatch" aria-hidden="true"></i>
               <span id="color-name"></span>
@@ -104,13 +118,14 @@
             </p>
           </div>
           <div>
-            <p class="charm-label">Lucky item</p>
+            <p class="charm-label" data-i18n="luckyItem">Lucky item</p>
             <p class="charm-value" id="item-name"></p>
           </div>
         </div>
         <p class="note" id="repeat-note" hidden></p>
         <div class="actions">
           <button type="button" class="ghost" id="copy">Copy fortune</button>
+          <a class="ghost" id="share-x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer">Share on X</a>
           <button type="button" class="ghost" id="share" hidden>Share</button>
         </div>
         <p id="copy-status" class="copy-status" role="status"></p>
@@ -118,10 +133,12 @@
 
       <noscript>
         <p class="hint">This fortune needs JavaScript. There is still no server.</p>
+        <p class="hint" lang="ja">この籤には JavaScript が要る。サーバーは、ない。</p>
+        <p class="hint" lang="zh-Hans">这张签需要 JavaScript。服务器并不存在。</p>
       </noscript>
 
       <footer class="site-footer">
-        <p>Signed <a href="https://github.com/uselesssoso">@uselesssoso</a></p>
+        <p><span data-i18n="signed">Signed</span> <a href="https://github.com/uselesssoso">@uselesssoso</a></p>
       </footer>
     </main>
     <script src="fortunes.js"></script>

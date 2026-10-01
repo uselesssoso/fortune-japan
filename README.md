@@ -4,9 +4,9 @@ Tells your fortune. Accuracy not included.
 
 ![An omikuji slip with a rank, six fortunes, a lucky color, and a lucky item](docs/screenshot.png)
 
-A small omikuji (おみくじ) you draw in the browser. Seven classic ranks, from 大吉 down to 大凶, across wish, love, work, health, lost items, and travel. Shake the box, pull a stick, read the slip.
+A small omikuji (おみくじ) you draw in the browser. Seven classic ranks, from 大吉 down to 大凶. The headings are the old ones: 願事, 縁談, 商売, 病気, 失せ物, 旅立ち. Read it in English, Japanese, or Chinese. Shake the box, pull a stick, read the slip.
 
-Give it a name and the answer stays fixed until midnight on your calendar. Leave the name blank and every draw is new. Nothing is stored and nothing is sent. A lucky color and a lucky item come with the slip, in case you wanted one more useless thing.
+Give it a name and the answer stays fixed until midnight on your calendar. Leave the name blank and every draw is new. Nothing is stored and nothing is sent. A lucky color and a lucky item come with the slip. Copy it, or post a short version on X.
 
 ## Run locally
 

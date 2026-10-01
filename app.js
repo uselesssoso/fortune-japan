@@ -3,6 +3,100 @@
 
   var data = window.OMIKUJI;
   var seen = Object.create(null);
+  var STORAGE_KEY = "fortune-japan-lang";
+  var lang = loadLang();
+  var UI = {
+    en: {
+      tagline: "Tells your fortune. Accuracy not included.",
+      name: "Name",
+      optional: "optional",
+      namePlaceholder: "For a fortune that stays put today",
+      hint: "Same name, same day, same answer. Your name stays in the browser.",
+      draw: "Draw a fortune",
+      shaking: "Shaking…",
+      drawAgain: "Draw again",
+      untilMidnight: "Good until midnight.",
+      oneTime: "A one-time draw.",
+      randomDraw: "Drawn at random",
+      luckyColor: "Lucky color",
+      luckyItem: "Lucky item",
+      renegotiate: "Same day, same answer. The shrine does not renegotiate.",
+      addName: "Add a name if you want this held until midnight.",
+      copy: "Copy fortune",
+      copied: "Copied",
+      copyFailed: "Copy failed",
+      copiedStatus: "Copied to the clipboard.",
+      copyFailedStatus: "Could not copy. Select the slip and copy it yourself.",
+      shareX: "Share on X",
+      share: "Share",
+      signed: "Signed",
+      langLabel: "Language",
+      numberPrefix: "No. ",
+      heldNamed: "For {name}, good until midnight.",
+      heldRandom: "Drawn at random.",
+      title: "fortune-japan — Tells your fortune",
+    },
+    ja: {
+      tagline: "運勢を告げる。精度は保証しない。",
+      name: "名前",
+      optional: "任意",
+      namePlaceholder: "今日の籤を固定するなら",
+      hint: "同じ名前、同じ日、同じ答え。名前はこのブラウザの中だけ。",
+      draw: "籤を引く",
+      shaking: "振っています…",
+      drawAgain: "もう一度",
+      untilMidnight: "深夜まで有効。",
+      oneTime: "一回きり。",
+      randomDraw: "名前なし",
+      luckyColor: "ラッキーカラー",
+      luckyItem: "ラッキーアイテム",
+      renegotiate: "同じ日、同じ答え。神社は交渉に応じない。",
+      addName: "深夜まで残すなら、名前を入れよ。",
+      copy: "籤をコピー",
+      copied: "コピーした",
+      copyFailed: "失敗",
+      copiedStatus: "クリップボードにコピーした。",
+      copyFailedStatus: "コピーできなかった。籤を選択して写せ。",
+      shareX: "Xで共有",
+      share: "共有",
+      signed: "署名",
+      langLabel: "言語",
+      numberPrefix: "第",
+      heldNamed: "{name}、深夜まで有効。",
+      heldRandom: "名前なしの一回。",
+      title: "fortune-japan — 運勢を告げる",
+    },
+    zh: {
+      tagline: "告诉你运势。准不准另说。",
+      name: "名字",
+      optional: "可选",
+      namePlaceholder: "用来把今天的签固定住",
+      hint: "同一个名字，同一天，同一个答案。名字只留在这台浏览器里。",
+      draw: "抽一签",
+      shaking: "摇签中…",
+      drawAgain: "再抽一次",
+      untilMidnight: "午夜前有效。",
+      oneTime: "只此一次。",
+      randomDraw: "未留名",
+      luckyColor: "幸运色",
+      luckyItem: "幸运物",
+      renegotiate: "同一天，同一个答案。神社不还价。",
+      addName: "想留到午夜，就写个名字。",
+      copy: "复制签文",
+      copied: "已复制",
+      copyFailed: "复制失败",
+      copiedStatus: "已复制到剪贴板。",
+      copyFailedStatus: "没复制成。选中签文，自己复制。",
+      shareX: "分享到 X",
+      share: "分享",
+      signed: "署名",
+      langLabel: "语言",
+      numberPrefix: "第",
+      heldNamed: "{name}，午夜前有效。",
+      heldRandom: "未留名，随机一抽。",
+      title: "fortune-japan — 告诉你运势",
+    },
+  };
 
   var form = document.getElementById("draw-form");
   var nameInput = document.getElementById("name");
@@ -12,6 +106,7 @@
   var stickNo = document.getElementById("stick-no");
   var slip = document.getElementById("slip");
   var copyButton = document.getElementById("copy");
+  var shareX = document.getElementById("share-x");
   var shareButton = document.getElementById("share");
   var copyStatus = document.getElementById("copy-status");
 
@@ -32,6 +127,12 @@
 
   shrineHit.addEventListener("click", function () {
     if (!drawing) form.requestSubmit();
+  });
+
+  document.getElementById("lang-switch").addEventListener("click", function (event) {
+    var button = event.target.closest("[data-lang]");
+    if (!button) return;
+    setLang(button.getAttribute("data-lang"));
   });
 
   copyButton.addEventListener("click", function () {
@@ -73,7 +174,7 @@
           restartAnimation(slip);
           setBusy(false);
           drawing = false;
-          drawButton.textContent = "Draw again";
+          drawButton.textContent = t("drawAgain");
           slip.scrollIntoView({
             behavior: reduced ? "auto" : "smooth",
             block: "nearest",
@@ -87,28 +188,23 @@
     drawButton.disabled = busy;
     shrineHit.classList.toggle("is-busy", busy);
     shaker.setAttribute("aria-busy", busy ? "true" : "false");
-    if (busy) drawButton.textContent = "Shaking…";
+    if (busy) drawButton.textContent = t("shaking");
   }
 
   function renderSlip(fortune) {
     slip.dataset.tone = fortune.rank.tone;
     slip.dataset.rank = fortune.rank.id;
 
-    text("slip-number", "No. " + fortune.number);
-    text("slip-when", fortune.named ? "Good until midnight." : "A one-time draw.");
+    text("slip-number", numberLabel(fortune.number));
+    text("slip-when", fortune.named ? t("untilMidnight") : t("oneTime"));
     text("rank-jp", fortune.rank.jp);
     text("rank-reading", fortune.rank.reading);
-    text("rank-en", fortune.rank.en);
-    text("summary", fortune.summary);
+    text("rank-en", fortune.rank.gloss[lang]);
+    text("summary", summaryText(fortune));
 
     var forLine = document.getElementById("slip-for");
-    if (fortune.named) {
-      forLine.hidden = false;
-      forLine.textContent = "For " + fortune.displayName + " · " + formatDate(fortune.date);
-    } else {
-      forLine.hidden = false;
-      forLine.textContent = "Drawn at random · " + formatDate(fortune.date);
-    }
+    forLine.hidden = false;
+    forLine.textContent = personLine(fortune);
 
     var list = document.getElementById("categories");
     list.replaceChildren();
@@ -117,15 +213,22 @@
       row.className = "category";
 
       var label = document.createElement("dt");
-      var jp = document.createElement("span");
-      jp.lang = "ja";
-      jp.textContent = category.jp;
-      var en = document.createElement("span");
-      en.textContent = category.en;
-      label.append(jp, en);
+      var ruby = document.createElement("ruby");
+      ruby.lang = "ja";
+      ruby.append(document.createTextNode(category.kanji));
+      var rt = document.createElement("rt");
+      rt.textContent = category.reading;
+      ruby.append(rt);
+      label.append(ruby);
+      if (lang !== "ja" && category.gloss[lang]) {
+        var gloss = document.createElement("span");
+        gloss.className = "gloss";
+        gloss.textContent = category.gloss[lang];
+        label.append(gloss);
+      }
 
       var body = document.createElement("dd");
-      body.textContent = fortune.lines[category.key];
+      body.textContent = lineText(fortune, category.key);
 
       row.append(label, body);
       list.append(row);
@@ -133,24 +236,27 @@
 
     var swatch = document.getElementById("color-swatch");
     swatch.style.background = fortune.color.hex;
-    text("color-name", fortune.color.name);
-    text("color-jp", fortune.color.jp);
-    text("item-name", fortune.item);
+    text("color-name", fortune.color.name[lang]);
+    var colorKanji = document.getElementById("color-jp");
+    colorKanji.hidden = lang === "ja";
+    colorKanji.textContent = fortune.color.kanji;
+    text("item-name", data.items[lang][fortune.itemIndex]);
 
     var note = document.getElementById("repeat-note");
     if (fortune.repeat) {
       note.hidden = false;
-      note.textContent = "Same day, same answer. The shrine does not renegotiate.";
+      note.textContent = t("renegotiate");
     } else if (!fortune.named) {
       note.hidden = false;
-      note.textContent = "Add a name if you want this held until midnight.";
+      note.textContent = t("addName");
     } else {
       note.hidden = true;
       note.textContent = "";
     }
 
-    copyButton.textContent = "Copy fortune";
+    copyButton.textContent = t("copy");
     copyStatus.textContent = "";
+    shareX.href = xIntentUrl(fortune);
   }
 
   function buildFortune(rawName) {
@@ -160,10 +266,10 @@
     var seed = named ? normalize(displayName) + "|" + dateKey(date) : null;
     var rand = makeRng(seed);
     var rank = pickWeighted(rand, data.ranks);
-    var summary = pick(rand, rank.summaries);
-    var lines = {};
+    var summaryIndex = Math.floor(rand() * rank.summaries.en.length);
+    var lineIndexes = {};
     data.categories.forEach(function (category) {
-      lines[category.key] = pick(rand, rank.lines[category.key]);
+      lineIndexes[category.key] = Math.floor(rand() * rank.lines[category.key].en.length);
     });
     return {
       displayName: displayName,
@@ -171,10 +277,10 @@
       date: date,
       seed: seed,
       rank: rank,
-      summary: summary,
-      lines: lines,
-      color: pick(rand, data.colors),
-      item: pick(rand, data.items),
+      summaryIndex: summaryIndex,
+      lineIndexes: lineIndexes,
+      color: data.colors[Math.floor(rand() * data.colors.length)],
+      itemIndex: Math.floor(rand() * data.items.en.length),
       number: 1 + Math.floor(rand() * 100),
     };
   }
@@ -182,24 +288,24 @@
   function formatPlain(fortune) {
     var lines = [
       "fortune-japan",
-      fortune.rank.jp + " · " + fortune.rank.en,
-      "No. " + fortune.number,
+      fortune.rank.jp + " · " + fortune.rank.gloss[lang],
+      numberLabel(fortune.number),
       "",
-      fortune.summary,
+      summaryText(fortune),
       "",
     ];
     data.categories.forEach(function (category) {
-      lines.push(category.en + " — " + fortune.lines[category.key]);
+      lines.push(categoryLabel(category) + " — " + lineText(fortune, category.key));
     });
     lines.push(
       "",
-      "Lucky color: " + fortune.color.name,
-      "Lucky item: " + fortune.item,
+      t("luckyColor") + ": " + fortune.color.name[lang],
+      t("luckyItem") + ": " + data.items[lang][fortune.itemIndex],
       "",
       fortune.named
-        ? "For " + fortune.displayName + ", good until midnight."
-        : "Drawn at random.",
-      "Tells your fortune. Accuracy not included."
+        ? t("heldNamed").replace("{name}", fortune.displayName)
+        : t("heldRandom"),
+      t("tagline")
     );
     return lines.join("\n");
   }
@@ -207,16 +313,81 @@
   function copyFortune(fortune) {
     var plain = formatPlain(fortune);
     writeClipboard(plain).then(function (ok) {
-      copyButton.textContent = ok ? "Copied" : "Copy failed";
-      copyStatus.textContent = ok
-        ? "Copied to the clipboard."
-        : "Could not copy. Select the slip and copy it yourself.";
+      copyButton.textContent = ok ? t("copied") : t("copyFailed");
+      copyStatus.textContent = ok ? t("copiedStatus") : t("copyFailedStatus");
       window.clearTimeout(copyTimer);
       copyTimer = window.setTimeout(function () {
-        copyButton.textContent = "Copy fortune";
+        copyButton.textContent = t("copy");
         copyStatus.textContent = "";
       }, 2400);
     });
+  }
+
+  var SITE_URL = "https://uselesssoso.github.io/fortune-japan/";
+  var X_MAX = 280;
+  var X_URL_LENGTH = 23;
+  var X_RANGES = [
+    [0, 4351, 100],
+    [8192, 8205, 100],
+    [8208, 8223, 100],
+    [8242, 8247, 100],
+  ];
+
+  function charWeight(code) {
+    for (var i = 0; i < X_RANGES.length; i += 1) {
+      if (code >= X_RANGES[i][0] && code <= X_RANGES[i][1]) return X_RANGES[i][2];
+    }
+    return 200;
+  }
+
+  function weightedLength(value) {
+    var units = 0;
+    for (var i = 0; i < value.length; ) {
+      var code = value.codePointAt(i);
+      units += charWeight(code);
+      i += code > 65535 ? 2 : 1;
+    }
+    return units / 100;
+  }
+
+  function xLead(rank) {
+    var gloss = rank.gloss[lang];
+    if (lang === "ja") return rank.jp + "（" + gloss + "）を引いた。";
+    if (lang === "zh") return "抽到" + rank.jp + "（" + gloss + "）：";
+    return "I drew " + rank.jp + " (" + gloss + "): ";
+  }
+
+  function xText(fortune) {
+    var lead = xLead(fortune.rank);
+    var summary = summaryText(fortune);
+    var budget = X_MAX - X_URL_LENGTH - 1;
+    var full = lead + summary;
+    if (weightedLength(full) <= budget) return full;
+    var ellipsis = "…";
+    var room = budget - weightedLength(lead) - weightedLength(ellipsis);
+    var trimmed = "";
+    var used = 0;
+    for (var i = 0; i < summary.length; ) {
+      var code = summary.codePointAt(i);
+      var weight = charWeight(code) / 100;
+      if (used + weight > room) break;
+      var step = code > 65535 ? 2 : 1;
+      trimmed += summary.slice(i, i + step);
+      used += weight;
+      i += step;
+    }
+    trimmed = trimmed.replace(/\s+\S*$/, "").trim();
+    if (!trimmed) trimmed = summary.slice(0, 1);
+    return lead + trimmed + ellipsis;
+  }
+
+  function xIntentUrl(fortune) {
+    return (
+      "https://x.com/intent/post?text=" +
+      encodeURIComponent(xText(fortune)) +
+      "&url=" +
+      encodeURIComponent(SITE_URL)
+    );
   }
 
   function shareFortune(fortune) {
@@ -299,11 +470,90 @@
   }
 
   function formatDate(date) {
-    return date.toLocaleDateString("en-GB", {
+    var locale = lang === "ja" ? "ja-JP" : lang === "zh" ? "zh-CN" : "en-GB";
+    return date.toLocaleDateString(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
+  }
+
+  function t(key) {
+    return UI[lang][key];
+  }
+
+  function loadLang() {
+    try {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === "en" || stored === "ja" || stored === "zh") return stored;
+    } catch (error) {
+      return "en";
+    }
+    return "en";
+  }
+
+  function setLang(next) {
+    if (next !== "en" && next !== "ja" && next !== "zh") next = "en";
+    lang = next;
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch (error) {
+      /* keep the choice for this visit */
+    }
+    applyStatic();
+  }
+
+  function applyStatic() {
+    document.documentElement.lang = lang === "zh" ? "zh-Hans" : lang;
+    document.title = t("title");
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+    var group = document.getElementById("lang-switch");
+    group.setAttribute("aria-label", t("langLabel"));
+    group.querySelectorAll("[data-lang]").forEach(function (button) {
+      var on = button.getAttribute("data-lang") === lang;
+      button.setAttribute("aria-checked", on ? "true" : "false");
+      button.classList.toggle("is-on", on);
+    });
+    shareX.textContent = t("shareX");
+    shareButton.textContent = t("share");
+    if (drawing) drawButton.textContent = t("shaking");
+    else drawButton.textContent = current ? t("drawAgain") : t("draw");
+    if (current) renderSlip(current);
+    else copyButton.textContent = t("copy");
+  }
+
+  function summaryText(fortune) {
+    return fortune.rank.summaries[lang][fortune.summaryIndex];
+  }
+
+  function lineText(fortune, key) {
+    return fortune.rank.lines[key][lang][fortune.lineIndexes[key]];
+  }
+
+  function categoryLabel(category) {
+    var ruby = category.kanji + "（" + category.reading + "）";
+    if (lang === "ja" || !category.gloss[lang]) return ruby;
+    return ruby + " " + category.gloss[lang];
+  }
+
+  function numberLabel(number) {
+    if (lang === "ja") return "第" + number + "番";
+    if (lang === "zh") return "第" + number + "签";
+    return "No. " + number;
+  }
+
+  function personLine(fortune) {
+    var date = formatDate(fortune.date);
+    if (fortune.named) {
+      if (lang === "en") return "For " + fortune.displayName + " · " + date;
+      return fortune.displayName + " · " + date;
+    }
+    return t("randomDraw") + " · " + date;
   }
 
   function hashString(value) {
@@ -335,10 +585,6 @@
     return mulberry32(hashString(seed));
   }
 
-  function pick(rand, list) {
-    return list[Math.floor(rand() * list.length)];
-  }
-
   function pickWeighted(rand, list) {
     var total = 0;
     for (var i = 0; i < list.length; i += 1) total += list[i].weight;
@@ -351,16 +597,27 @@
   }
 
   function validateData() {
-    var keys = data.categories.map(function (category) {
-      return category.key;
-    });
+    var codes = ["en", "ja", "zh"];
+    if (data.items.ja.length !== data.items.en.length || data.items.zh.length !== data.items.en.length) {
+      throw new Error("Item lists differ in length");
+    }
     data.ranks.forEach(function (rank) {
-      if (!rank.summaries.length) throw new Error("Missing summaries for " + rank.id);
-      keys.forEach(function (key) {
-        if (!rank.lines[key] || !rank.lines[key].length) {
-          throw new Error("Missing lines for " + rank.id + " " + key);
+      codes.forEach(function (code) {
+        if (rank.summaries[code].length !== rank.summaries.en.length) {
+          throw new Error("Summary length " + rank.id + " " + code);
         }
+      });
+      data.categories.forEach(function (category) {
+        var bundle = rank.lines[category.key];
+        if (!bundle) throw new Error("Missing " + rank.id + " " + category.key);
+        codes.forEach(function (code) {
+          if (!bundle[code] || bundle[code].length !== bundle.en.length) {
+            throw new Error("Line length " + rank.id + " " + category.key + " " + code);
+          }
+        });
       });
     });
   }
+
+  applyStatic();
 })();
